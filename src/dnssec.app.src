@@ -1,0 +1,8 @@
+{application,dnssec,
+             [{description,"DNS library"},
+              {vsn,"0.1.2"},
+              {licenses,["Apache"]},
+              {modules,[]},
+              {registered,[]},
+              {applications,[kernel,stdlib,crypto,base32]},
+              {env,[]}]}.
