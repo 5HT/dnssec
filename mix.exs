@@ -13,7 +13,7 @@ defmodule DNSSEC.Mixfile do
   def package do
     [
       files: ~w(include priv src mix.exs LICENSE),
-      licenses: ["Apache"],
+      licenses: ["Apache-2.0"],
       maintainers: ["Namdak Tonpa"],
       name: :dnssec,
       links: %{"GitHub" => "https://github.com/5HT/dnssec"}
