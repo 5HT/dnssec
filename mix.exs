@@ -3,7 +3,7 @@ defmodule DNSSEC.Mixfile do
 
   def project do
     [ app: :dnssec,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.7",
       description: "DNSSEC Library",
       package: package(),
@@ -12,7 +12,7 @@ defmodule DNSSEC.Mixfile do
 
   def package do
     [
-      files: ~w(include priv src mix.exs LICENSE),
+      files: ~w(include priv src mix.exs LICENSE rebar.config),
       licenses: ["Apache-2.0"],
       maintainers: ["Namdak Tonpa"],
       name: :dnssec,

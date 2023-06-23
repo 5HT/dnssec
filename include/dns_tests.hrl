@@ -40,8 +40,12 @@ message_edns_test() ->
 		       errorcode = ?DNS_LLQERRCODE_NOERROR,
 		       id = 42,
 		       leaselife = 7200},
+	ECS = #dns_opt_ecs{family = 1,
+					   source_prefix_length = 24,
+					   scope_prefix_length = 0,
+					   address = <<1,1,1>>},
     Ads = [#dns_optrr{udp_payload_size = 4096, ext_rcode = 0, version = 0,
-		      dnssec=false, data = [LLQ]}],
+		      dnssec=false, data = [LLQ, ECS]}],
     QLen = length(Qs),
     AnsLen = length(Ans),
     AdsLen = length(Ads),
@@ -190,7 +194,14 @@ decode_encode_rrdata_test_() ->
 	      {?DNS_TYPE_MINFO, #dns_rrdata_minfo{rmailbx = <<"a.b">>,
 						  emailbx = <<"c.d">>}},
 	      {?DNS_TYPE_MR, #dns_rrdata_mr{newname = <<"example.com">>}},
-              {?DNS_TYPE_CAA, #dns_rrdata_caa{flags = 0, tag = <<"issue">>, value = <<"letsencrypt.org">>}}
+              {?DNS_TYPE_CAA, #dns_rrdata_caa{flags = 0, tag = <<"issue">>, value = <<"letsencrypt.org">>}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_PORT_NUMBER => 8080}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_NO_DEFAULT_ALPN => none}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_ALPN => <<"h2,h3">>}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_ECHCONFIG => <<"123abc">>}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_IPV4HINT => <<"1.2.3.4,1.2.3.5">>}}},
+              {?DNS_TYPE_SVCB, #dns_rrdata_svcb{svc_priority = 0, target_name = <<"target.example.com">>, svc_params = #{?DNS_SVCB_PARAM_IPV6HINT => <<"2001:0db8:85a3:0000:0000:8a2e:0370:7334,2001:0db8:85a3:0000:0000:8a2e:0370:7335">>}}}
             ],
     [ ?_test(
 	 begin
@@ -213,6 +224,10 @@ decode_encode_optdata_test_() ->
 			   leaselife = 456},
 	      #dns_opt_ul{lease = 789},
 	      #dns_opt_nsid{data = <<"hi">>},
+		  #dns_opt_ecs{family = 1,
+					   source_prefix_length = 24,
+					   scope_prefix_length = 0,
+					   address = <<1,1,1>>},
 	      #dns_opt_unknown{id = 999, bin = <<"hi">>} ],
     [ ?_assertEqual([Case], decode_optrrdata(encode_optrrdata([Case])))
       || Case <- Cases ].
@@ -236,6 +251,15 @@ decode_encode_optdata_owner_test_() ->
 			     _ = <<>>} ],
     [ ?_assertEqual([Case], decode_optrrdata(encode_optrrdata([Case])))
       || Case <- Cases ].
+
+decode_encode_svcb_params_test() ->
+  Cases = [
+           {#{}, #{}},
+           {#{?DNS_SVCB_PARAM_PORT => 8079}, #{?DNS_SVCB_PARAM_PORT => 8079}},
+           {#{port => 8080}, #{?DNS_SVCB_PARAM_PORT => 8080}}
+          ],
+
+  [ ?assertEqual(Expected, decode_svcb_svc_params(encode_svcb_svc_params(Input))) || {Input, Expected} <- Cases ].
 
 %%%===================================================================
 %%% Domain name functions
